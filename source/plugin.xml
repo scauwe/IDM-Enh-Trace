@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension-point id="info.vancauwenberge.designer.enhtrace.viewer.outline" name="TraceOutlineContectMenu" schema="schema/info.vancauwenberge.designer.enhtrace.viewer.outline.exsd"/>
+   <!--
+   <extension point="org.eclipse.ui.actionSets">   		    		 
+   		 <actionSet 
+	   		 visible="true" 
+  			 id="info.vancauwenberge.designer.enhtrace.editActionSet"
+   			 label="SVC Trace Action">   			    
+		  
+         
+   		 	 <action
+               label="SVC Trace"
+               class="info.vancauwenberge.designer.enhtrace.action.TraceActionDelegate"
+               tooltip="SVC Trace"
+               menubarPath="toolsmenu/dsTrace"
+               icon="icons/livetrace.gif"
+               enablesFor="*"
+               id="com.novell.core.dstraceviewer.toolsmenu.opentrace.action.id">                              
+         	 </action>      	 
+         	
+           <menu
+               label="SVC Trace Menu"
+               path="additions"
+               id="toolsmenu">
+			   <groupMarker name="docGen"/>          	  	
+         	   <groupMarker name="dsTrace"/>          	  	
+         	   <groupMarker name="directoryTools"/>        
+         </menu>
+		</actionSet> 
+	</extension>-->
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            name="Enhanced DS Trace Detail"
+            extensions="dstrace"
+            icon="icons/sample.gif"
+            contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
+            class="info.vancauwenberge.designer.enhtrace.editors.DetailedTraceEditor"
+            id="info.vancauwenberge.designer.enhtrace.editors.DetailedTraceEditor">
+      </editor>
+      <editor
+            name="Enhanced DS Trace"
+            extensions="dstrace"
+            icon="icons/sample.gif"
+            contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
+            class="info.vancauwenberge.designer.enhtrace.editors.LiveTraceEditor"
+            id="info.vancauwenberge.designer.enhtrace.editors.EnhTraceEditor">
+      </editor>
+   </extension>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+         		<objectContribution
+			objectClass="info.vancauwenberge.designer.enhtrace.api.ILogMessage"
+            id="info.vancauwenberge.designer.enhtrace.viewer.outline">
+
+         	 <action
+                 class="info.vancauwenberge.designer.enhtrace.action.OpenDetailAction"
+                 definitionId="info.vancauwenberge.designer.enhtrace.editors.OpenDetailedTraceEditor"
+                 enablesFor="1"
+                 id="info.vancauwenberge.designer.enhtrace.action.OpenDetailAction.default"
+                 label="Open"
+                 menubarPath="additions"
+                 tooltip="Trace details">
+         	</action>
+      	</objectContribution>
+         
+   </extension>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+ 
+          <!-- Properties menu item in Model Editor. -->
+      <objectContribution
+            objectClass="com.novell.idm.model.Server"
+            id="info.vancauwenberge.designer.enhtrace">
+
+ 
+         <action
+               label="Live Trace"
+               class="info.vancauwenberge.designer.enhtrace.action.OpenTraceAction"
+               enablesFor="1"
+               id="info.vancauwenberge.designer.enhtrace.action.OpenTraceAction">
+         </action>
+      </objectContribution>
+   </extension>
+</plugin>
