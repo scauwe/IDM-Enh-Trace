@@ -19,6 +19,7 @@
  *******************************************************************************/
 package info.vancauwenberge.designer.enhtrace.viewer.outline;
 
+import info.vancauwenberge.designer.enhtrace.Activator;
 import info.vancauwenberge.designer.enhtrace.action.OpenDetailAction;
 import info.vancauwenberge.designer.enhtrace.api.ILogMessage;
 import info.vancauwenberge.designer.enhtrace.api.ILogMessageProvider;
@@ -141,18 +142,22 @@ public class LogMessageOutlinePage extends ContentOutlinePage {
 			System.out.println("DBLclikc selection:"+event.getSelection());
 			System.out.println("DBLclikc source:"+event.getSource());
 			System.out.println("DBLclikc viewer:"+event.getViewer());
-			menu.notifyListeners(SWT.Show, new Event());
-
-	    	  try{
-	    		  OpenDetailAction action = new OpenDetailAction((IStructuredSelection) event.getSelection(), editor);
-	    		  action.run(null);
-	    	  }catch (Exception e) {
-	        		MessageBox dialog = 
-		        			  new MessageBox(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), SWT.ICON_INFORMATION | SWT.OK);
-		        		dialog.setText("Detailed Trace");
-		        		dialog.setMessage("No details to show for this message.");
-		        		dialog.open(); 
+			try{
+				menu.notifyListeners(SWT.Show, new Event());
+				try{
+					OpenDetailAction action = new OpenDetailAction((IStructuredSelection) event.getSelection(), editor);
+					action.run(null);
+				}catch (Exception e) {
+					MessageBox dialog = 
+							new MessageBox(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), SWT.ICON_INFORMATION | SWT.OK);
+					dialog.setText("Detailed Trace");
+					dialog.setMessage("No details to show for this message.");
+					dialog.open(); 
+				}
+			}catch (Exception e) {
+				Activator.log("Failed to notify listeners", e);
 			}
+
 			/*
 			 * 
 			//MenuItem defaultItem = getDefaultMenuItem();
