@@ -20,19 +20,6 @@
 package info.vancauwenberge.designer.enhtrace.viewer.outline.page;
 
 
-import info.vancauwenberge.designer.enhtrace.Activator;
-import info.vancauwenberge.designer.enhtrace.action.OpenDetailAction;
-import info.vancauwenberge.designer.enhtrace.api.ILogMessage;
-import info.vancauwenberge.designer.enhtrace.api.ILogMessageProvider;
-import info.vancauwenberge.designer.enhtrace.api.IPolicySetLogMessage;
-import info.vancauwenberge.designer.enhtrace.api.IRootLogMessage.Status;
-import info.vancauwenberge.designer.enhtrace.editor.input.StaticTraceEditorInput;
-import info.vancauwenberge.designer.enhtrace.editor.input.StaticTraceEditorInput.IStaticInputListener;
-import info.vancauwenberge.designer.enhtrace.editor.input.StaticTraceEditorInput.PolicySteps;
-import info.vancauwenberge.designer.enhtrace.editors.DetailedTraceEditor;
-import info.vancauwenberge.designer.enhtrace.model.logmessage.StatusLogMessage;
-import info.vancauwenberge.designer.enhtrace.util.Util;
-
 import java.awt.Polygon;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -80,6 +67,19 @@ import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 import com.novell.core.Core;
 
+import info.vancauwenberge.designer.enhtrace.Activator;
+import info.vancauwenberge.designer.enhtrace.action.OpenDetailAction;
+import info.vancauwenberge.designer.enhtrace.api.ILogMessage;
+import info.vancauwenberge.designer.enhtrace.api.ILogMessageProvider;
+import info.vancauwenberge.designer.enhtrace.api.IPolicySetLogMessage;
+import info.vancauwenberge.designer.enhtrace.api.IRootLogMessage.Status;
+import info.vancauwenberge.designer.enhtrace.editor.input.StaticTraceEditorInput;
+import info.vancauwenberge.designer.enhtrace.editor.input.StaticTraceEditorInput.IStaticInputListener;
+import info.vancauwenberge.designer.enhtrace.editor.input.StaticTraceEditorInput.PolicySteps;
+import info.vancauwenberge.designer.enhtrace.editors.DetailedTraceEditor;
+import info.vancauwenberge.designer.enhtrace.model.logmessage.StatusLogMessage;
+import info.vancauwenberge.designer.enhtrace.util.Util;
+
 /*
  * The outline view of the event details is a paged view.
  * This is the policyFlow page showing the fishbone view
@@ -93,45 +93,46 @@ public class DetailedPolicyFlowPage extends Page  implements ISelectionChangedLi
 	private static final RGB RGB_BOUND_RIGHTSELECTED = new RGB(0,0,125);
 	private static final RGB RGB_BOUND_UNSELECTED = new RGB(192,192,192);
 	private static final RGB RGB_LABEL = new RGB(0,0,0);
-	
+
 	private static final Pattern applyingPolicyPattern = Pattern.compile("%14C.*%3C");
 	private static final Pattern applyingPolicySetPattern = Pattern.compile("^Applying ");
 	private class GotoLogmessageAction extends Action {
 		private final ILogMessage messageToSelect;
 
-		private GotoLogmessageAction(String text, ILogMessage messageToSelect) {
+		private GotoLogmessageAction(final String text, final ILogMessage messageToSelect) {
 			super(text);
 			this.messageToSelect = messageToSelect;
 		}
-		
+
+		@Override
 		public void run(){
 			details.setSelection(new IStructuredSelection() {
-		
+
 				@Override
 				public boolean isEmpty() {
 					return false;
 				}
-		
+
 				@Override
 				public List<?> toList() {
 					return Arrays.asList(toArray());
 				}	
-		
+
 				@Override
 				public Object[] toArray() {
 					return new ILogMessage[]{messageToSelect};
 				}
-		
+
 				@Override
 				public int size() {
 					return 1;
 				}
-		
+
 				@Override
 				public Iterator<?> iterator() {
 					return toList().iterator();
 				}
-		
+
 				@Override
 				public Object getFirstElement() {
 					return messageToSelect;
@@ -152,20 +153,20 @@ public class DetailedPolicyFlowPage extends Page  implements ISelectionChangedLi
 		final String label;
 		final Image textImage;
 
-		private PaintData(int[] points, String label, Image textImage){
+		private PaintData(final int[] points, final String label, final Image textImage){
 			this.label = label;
 			this.textImage = textImage;
 			this.points = points;
-			int[] x=new int[points.length/2];
-			int[]y=new int[points.length/2];
+			final int[] x=new int[points.length/2];
+			final int[]y=new int[points.length/2];
 			int minX = Integer.MAX_VALUE;
 			int maxX = Integer.MIN_VALUE;
 			int minY = Integer.MAX_VALUE;
 			int maxY = Integer.MIN_VALUE;
 			//Convert the points to 2 ararys, x and ynew int[]{77,55,  77,73,  95,82,  113,73,  113,55,  95,64}
-			for (int i = 0; i < points.length/2; i++) {
+			for (int i = 0; i < (points.length/2); i++) {
 				x[i] = points[i*2];
-				y[i] = points[i*2+1];
+				y[i] = points[(i*2)+1];
 				minX = Math.min(minX,x[i]);
 				maxX = Math.max(maxX,x[i]);
 				minY = Math.min(minY,y[i]);
@@ -178,10 +179,10 @@ public class DetailedPolicyFlowPage extends Page  implements ISelectionChangedLi
 			this.polygon = new Polygon(x,y,x.length);
 		}
 	}
-	
+
 	static final Map<StaticTraceEditorInput.PolicySteps, PaintData> paintdataMap = new EnumMap<StaticTraceEditorInput.PolicySteps, DetailedPolicyFlowPage.PaintData>(StaticTraceEditorInput.PolicySteps.class);
 	static{
-		
+
 		paintdataMap.put(StaticTraceEditorInput.PolicySteps.INPUT_TRANSFORM, new PaintData(new int[]{77,55,  77,73,  95,82,  113,73,  113,55,  95,64},"Input", Core.getImage("icons/policyflow/text_input.png")));
 		paintdataMap.put(StaticTraceEditorInput.PolicySteps.OUTPUT_TRANSFORM, new PaintData(new int[]{117,66,  117,84,  135,75,  153,84,  153,66,  135,57},"Output",Core.getImage("icons/policyflow/text_output.png")));
 		paintdataMap.put(StaticTraceEditorInput.PolicySteps.PUB_SCHEMA_MAP, new PaintData(new int[]{24,89,  24,115,  108,115,  108,89},"Schema Mapping",Core.getImage("icons/policyflow/text_schema.png")));
@@ -206,46 +207,46 @@ public class DetailedPolicyFlowPage extends Page  implements ISelectionChangedLi
 		paintdataMap.put(StaticTraceEditorInput.PolicySteps.PUB_ASS_PROCESSOR, new PaintData(new int[]{59,116,  59,130,  83,130,  83,116 },"Ass.", null));
 		paintdataMap.put(StaticTraceEditorInput.PolicySteps.SUB_ASS_PROCESSOR, new PaintData(new int[]{149,116,  149,130,  173,130,  173,116 },"Ass.",null));
 		paintdataMap.put(StaticTraceEditorInput.PolicySteps.PUB_RESET_INJECTION, new PaintData(new int[]{5,302,  5,314,  26,314,  32,308, 26,302},"Inject",null));
-		
+
 		paintdataMap.put(StaticTraceEditorInput.PolicySteps.PUB_STARTUP, new PaintData(new int[]{26,23,  26,41,  72,41,  72,23},"Startup",null));
 		paintdataMap.put(StaticTraceEditorInput.PolicySteps.SUB_SHUTDOWN, new PaintData(new int[]{149,23,  149,41,  195,41,  195,23},"Shutdown",null));
 	}
-	
+
 	private ScrolledComposite pageContent;
 	private Canvas canvas;
-	private DetailedTraceEditor details;
-	private Image imagePageFlow;
+	private final DetailedTraceEditor details;
+	private final Image imagePageFlow;
 	private PolicySteps selectedPolicySet;
 	private PolicySteps rightClickSelectedPolicySet;
 	private Font canvasFont;
-	private Map<RGB,Color> colorCache = new HashMap<RGB,Color>();
-	
-	private List<StatusLogMessage> nonpolicyStatusses = new ArrayList<StatusLogMessage>();
+	private final Map<RGB,Color> colorCache = new HashMap<RGB,Color>();
+
+	private final List<StatusLogMessage> nonpolicyStatusses = new ArrayList<StatusLogMessage>();
 	private Cursor cursorPointer;
 	private MenuManager menuManager;
-	private Image overlayRetry;
-	private Image overlaySuccess;
-	private Image overlayWarning;
-	private Image overlayError;
-	private Image overlayFatal;
-	private StaticTraceEditorInput input;
-	private Map<PolicySteps, Image> policy2ImageMap = new EnumMap<PolicySteps, Image>(PolicySteps.class);
+	private final Image overlayRetry;
+	private final Image overlaySuccess;
+	private final Image overlayWarning;
+	private final Image overlayError;
+	private final Image overlayFatal;
+	private final StaticTraceEditorInput input;
+	private final Map<PolicySteps, Image> policy2ImageMap = new EnumMap<PolicySteps, Image>(PolicySteps.class);
 
-	public DetailedPolicyFlowPage(DetailedTraceEditor details) {
+	public DetailedPolicyFlowPage(final DetailedTraceEditor details) {
 		this.details = details;
 		this.input = ((StaticTraceEditorInput)details.getEditorInput());
-		
+
 		input.addListener(this);
 		details.addSelectionChangedListener(this);
-		
-		
+
+
 		//TODO: somehow reuse the image for multiple detail views.
 		ImageDescriptor imageDescr =  Activator.getImageDescriptor("icons/page_flow_shell4.gif");
 		this.imagePageFlow = imageDescr.createImage();
 
 		imageDescr =  Activator.getImageDescriptor("icons/overlayRetry.gif");
 		this.overlayRetry = imageDescr.createImage();
-		
+
 		imageDescr =  Activator.getImageDescriptor("icons/overlaySuccess.gif");
 		this.overlaySuccess = imageDescr.createImage();
 
@@ -257,25 +258,26 @@ public class DetailedPolicyFlowPage extends Page  implements ISelectionChangedLi
 
 		imageDescr =  Activator.getImageDescriptor("icons/overlayFatal.gif");
 		this.overlayFatal = imageDescr.createImage();
-		
+
 		createOverlayMap();
 	}
 
-	public void createControl(Composite parent){
+	@Override
+	public void createControl(final Composite parent){
 		pageContent = new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
 		pageContent.setExpandHorizontal(true);
 		pageContent.setExpandVertical(false);
 		pageContent.setContent(createContent());
 		createMenu();
 	}
-	
+
 	private void disposeColorCache(){
-		for (Color colors:colorCache.values()){
+		for (final Color colors:colorCache.values()){
 			colors.dispose();
 		}
 	}
-	
-	private Color getColor(RGB rgb){
+
+	private Color getColor(final RGB rgb){
 		Color color = colorCache.get(rgb);
 		if (color == null){
 			color = new Color(canvas.getDisplay(),rgb);
@@ -283,8 +285,8 @@ public class DetailedPolicyFlowPage extends Page  implements ISelectionChangedLi
 		}
 		return color;
 	}
-	
-	
+
+
 	private void createMenu(){
 		//Add a context menu extention point
 		menuManager =  new  MenuManager ();
@@ -293,124 +295,125 @@ public class DetailedPolicyFlowPage extends Page  implements ISelectionChangedLi
 		menuManager.setRemoveAllWhenShown ( true );
 
 		//Control control = getControl();
-		Menu menu = menuManager.createContextMenu(canvas);
+		final Menu menu = menuManager.createContextMenu(canvas);
 		canvas.setMenu(menu);
 
 		menuManager.addMenuListener(this);
-		
+
 		/*
 		Control control = getControl();
-		
+
 		Menu menu = new Menu(canvas);
 		canvas.setMenu(menu);
 		MenuItem item = new MenuItem(menu, SWT.PUSH);
 	    item.setText("Popup");*/
 	}
-	
-	
-	
+
+
+
 	private Control createContent() {
 		// * Note: The <code>NO_BACKGROUND</code>, <code>NO_FOCUS</code>, <code>NO_MERGE_PAINTS</code>,
 		// * and <code>NO_REDRAW_RESIZE</code> styles are intended for use with <code>Canvas</code>.
 
 		this.canvas = new Canvas(pageContent, SWT.NO_MERGE_PAINTS | SWT.NO_REDRAW_RESIZE);
-		
-		ImageData imageData = imagePageFlow.getImageData();
-		
-		int shellWidth = imageData.width;
-	    int shellHeight = imageData.height;
-	    canvas.setBounds(0, 0, shellWidth, shellHeight);
-	    cursorPointer = new Cursor(canvas.getDisplay(), SWT.CURSOR_HAND);
-	    System.out.println("shellWidth:"+shellWidth+"; shellHeight"+shellHeight);
-	    Font f = PlatformUI.getWorkbench().getDisplay().getSystemFont();
-	    FontData fontdata  = f.getFontData()[0];
-	    //Take the default system font, but a bit smaller
-	    this.canvasFont = new Font(canvas.getDisplay(), fontdata.getName(), fontdata.getHeight()-4, fontdata.getStyle());
-	    
-	    canvas.setFont(canvasFont);
-	    
-	    //GC gc = new GC(canvas);
+
+		final ImageData imageData = imagePageFlow.getImageData();
+
+		final int shellWidth = imageData.width;
+		final int shellHeight = imageData.height;
+		canvas.setBounds(0, 0, shellWidth, shellHeight);
+		cursorPointer = new Cursor(canvas.getDisplay(), SWT.CURSOR_HAND);
+		System.out.println("shellWidth:"+shellWidth+"; shellHeight"+shellHeight);
+		final Font f = PlatformUI.getWorkbench().getDisplay().getSystemFont();
+		final FontData fontdata  = f.getFontData()[0];
+		//Take the default system font, but a bit smaller
+		this.canvasFont = new Font(canvas.getDisplay(), fontdata.getName(), fontdata.getHeight()-4, fontdata.getStyle());
+
+		canvas.setFont(canvasFont);
+
+		//GC gc = new GC(canvas);
 
 		canvas.addPaintListener(new PaintListener() {
-			
+
 			@Override
-			public void paintControl(PaintEvent e) {
-			    e.gc.drawImage(imagePageFlow, 0, 0);
-		    	e.gc.setLineCap(SWT.CAP_SQUARE);
-			    for (PolicySteps policySet: PolicySteps.values()){
-			    	PaintData paintData = paintdataMap.get(policySet);
-			    	List<IPolicySetLogMessage> messageList = input.getPolicy2MessageMap().get(policySet);
-			    	//Fill with "having data colour
-			    	if (messageList != null){
-			    		switch (policySet) {
+			public void paintControl(final PaintEvent e) {
+				e.gc.drawImage(imagePageFlow, 0, 0);
+				e.gc.setLineCap(SWT.CAP_SQUARE);
+				for (final PolicySteps policySet: PolicySteps.values()){
+					final PaintData paintData = paintdataMap.get(policySet);
+					final List<IPolicySetLogMessage> messageList = input.getPolicy2MessageMap().get(policySet);
+					//Fill with "having data colour
+					if (messageList != null){
+						switch (policySet) {
 						case PUB_NOTIFY_FILTER:
 						case PUB_SYNC_FILTER:
 						case SUB_NOTIFY_FILTER:
 						case SUB_SYNC_FILTER:
 						case SUB_ADD_PROCESSOR:
 						case PUB_ADD_PROCESSOR:
-				    		e.gc.setBackground(getColor(RGB_FILL_HAS_FILTER_DATA));							
+							e.gc.setBackground(getColor(RGB_FILL_HAS_FILTER_DATA));							
 							break;
 						default:
-				    		e.gc.setBackground(getColor(RGB_FILL_HAS_DATA));
+							e.gc.setBackground(getColor(RGB_FILL_HAS_DATA));
 							break;
 						}
-			    	}
-			    	else
-			    		e.gc.setBackground(getColor(RGB_FILL_HAS_NO_DATA));
-			    	e.gc.fillPolygon(paintData.points);
+					} else {
+						e.gc.setBackground(getColor(RGB_FILL_HAS_NO_DATA));
+					}
+					e.gc.fillPolygon(paintData.points);
 
-			    	if (selectedPolicySet==policySet){
-				    	e.gc.setLineWidth(2);
-				    	e.gc.setForeground(getColor(RGB_BOUND_SELECTED));
-				    	e.gc.drawPolygon(paintData.points);//new int[]{77+1,55+1,  77+1,73,  95,82-1,  113,73-1,  113,55+1,  95,64+1});			    		
-			    	}else if (rightClickSelectedPolicySet==policySet){
-				    	e.gc.setLineWidth(2);
-				    	e.gc.setForeground(getColor(RGB_BOUND_RIGHTSELECTED));
-				    	e.gc.drawPolygon(paintData.points);//new int[]{77+1,55+1,  77+1,73,  95,82-1,  113,73-1,  113,55+1,  95,64+1});			    		
-			    	}else {//UnSelected bounds
-				    	e.gc.setLineWidth(1);
-				    	e.gc.setForeground(getColor(RGB_BOUND_UNSELECTED));
-				    	e.gc.drawPolygon(paintData.points);			    		
-			    	}
-			    	
-			    	if (paintData.textImage != null){
-			    		Rectangle strSize = paintData.textImage.getBounds();
-			    		e.gc.drawImage(paintData.textImage, (paintData.maxX+paintData.minX-strSize.width)/2, (paintData.maxY+paintData.minY-strSize.height)/2);
-			    	}else 		
-			    		//Draw the label
-			    		if (paintData.label != null){
-			    			e.gc.setForeground(getColor(RGB_LABEL));
-			    			Point strSize = e.gc.stringExtent(paintData.label);
-			    			e.gc.drawText(paintData.label, (paintData.maxX+paintData.minX-strSize.x)/2 , (paintData.maxY+paintData.minY-strSize.y)/2, true);
-			    		}
-			    	//Draw any overlay if the message has a status as a child
-			    	Image overlay = policy2ImageMap.get(policySet);
-			    	if (overlay != null){
-			    		e.gc.drawImage(overlay, paintData.minX, paintData.minY);			    		
-			    	}
-			    }
+					if (selectedPolicySet==policySet){
+						e.gc.setLineWidth(2);
+						e.gc.setForeground(getColor(RGB_BOUND_SELECTED));
+						e.gc.drawPolygon(paintData.points);//new int[]{77+1,55+1,  77+1,73,  95,82-1,  113,73-1,  113,55+1,  95,64+1});			    		
+					}else if (rightClickSelectedPolicySet==policySet){
+						e.gc.setLineWidth(2);
+						e.gc.setForeground(getColor(RGB_BOUND_RIGHTSELECTED));
+						e.gc.drawPolygon(paintData.points);//new int[]{77+1,55+1,  77+1,73,  95,82-1,  113,73-1,  113,55+1,  95,64+1});			    		
+					}else {//UnSelected bounds
+						e.gc.setLineWidth(1);
+						e.gc.setForeground(getColor(RGB_BOUND_UNSELECTED));
+						e.gc.drawPolygon(paintData.points);			    		
+					}
+
+					if (paintData.textImage != null){
+						final Rectangle strSize = paintData.textImage.getBounds();
+						e.gc.drawImage(paintData.textImage, ((paintData.maxX+paintData.minX)-strSize.width)/2, ((paintData.maxY+paintData.minY)-strSize.height)/2);
+					}else 		
+						//Draw the label
+						if (paintData.label != null){
+							e.gc.setForeground(getColor(RGB_LABEL));
+							final Point strSize = e.gc.stringExtent(paintData.label);
+							e.gc.drawText(paintData.label, ((paintData.maxX+paintData.minX)-strSize.x)/2 , ((paintData.maxY+paintData.minY)-strSize.y)/2, true);
+						}
+					//Draw any overlay if the message has a status as a child
+					final Image overlay = policy2ImageMap.get(policySet);
+					if (overlay != null){
+						e.gc.drawImage(overlay, paintData.minX, paintData.minY);			    		
+					}
+				}
 			}
 
 		});
-		
+
 		canvas.addMouseMoveListener(this);
 		canvas.addMouseListener(this);
-		
+
 		return canvas;
 
 	}
 
+	@Override
 	public void setFocus(){
 		pageContent.setFocus();
 	}
-	
+
 	@Override
-	public void mouseMove(MouseEvent e) {
+	public void mouseMove(final MouseEvent e) {
 		if (isStatusOverlayPosition(e.x,e.y)){
 			canvas.setCursor(cursorPointer);			
 		}else{
-			PolicySteps aPolicy = getPolicySets(e.x,e.y);
+			final PolicySteps aPolicy = getPolicySets(e.x,e.y);
 			if (aPolicy != null){
 				canvas.setCursor(cursorPointer);
 			}else{
@@ -418,114 +421,117 @@ public class DetailedPolicyFlowPage extends Page  implements ISelectionChangedLi
 			}
 		}
 	}
-	
+
+	@Override
 	public Control getControl(){
 		return pageContent;
 	}
-	
+
 	@Override
 	public ISelection getSelection() {
 		return null;
 	}
-	
+
 	private IStructuredSelection createSelection(final ILogMessage statusMessage) {
 		return new IStructuredSelection() {
-			
+
 			@Override
 			public boolean isEmpty() {
 				return false;
 			}
-			
+
 			@Override
 			public List<?> toList() {
-				List<ILogMessage> result = new ArrayList<ILogMessage>(1);
+				final List<ILogMessage> result = new ArrayList<ILogMessage>(1);
 				result.add(statusMessage);
 				return result;
 			}
-			
+
 			@Override
 			public Object[] toArray() {
 				return new Object[]{statusMessage};
 			}
-			
+
 			@Override
 			public int size() {
 				return 1;
 			}
-			
+
 			@Override
 			public Iterator<?> iterator() {
 				return toList().iterator();
 			}
-			
+
 			@Override
 			public Object getFirstElement() {
 				return statusMessage;
 			}
 		};
 	}
-	
-	private IStructuredSelection createSelection( PolicySteps PolicySteps) {
+
+	private IStructuredSelection createSelection( final PolicySteps PolicySteps) {
 		if (PolicySteps != null){
 			final List<IPolicySetLogMessage> result = input.getPolicy2MessageMap().get(PolicySteps);
 			System.out.println(this.getClass().getName()+".createSelection():"+result);
-			if (result != null && result.size()>0)
+			if ((result != null) && (result.size()>0)) {
 				return new IStructuredSelection() {
-				
-				@Override
-				public boolean isEmpty() {
-					return false;
-				}
-				
-				@Override
-				public List<?> toList() {
-					return result;
-				}
-				
-				@Override
-				public Object[] toArray() {
-					return result.toArray();
-				}
-				
-				@Override
-				public int size() {
-					return result.size();
-				}
-				
-				@Override
-				public Iterator<?> iterator() {
-					return result.iterator();
-				}
-				
-				@Override
-				public Object getFirstElement() {
-					return result.get(0);
-				}
-			};
+
+					@Override
+					public boolean isEmpty() {
+						return false;
+					}
+
+					@Override
+					public List<?> toList() {
+						return result;
+					}
+
+					@Override
+					public Object[] toArray() {
+						return result.toArray();
+					}
+
+					@Override
+					public int size() {
+						return result.size();
+					}
+
+					@Override
+					public Iterator<?> iterator() {
+						return result.iterator();
+					}
+
+					@Override
+					public Object getFirstElement() {
+						return result.get(0);
+					}
+				};
+			}
 		}
 		System.out.println(this.getClass().getName()+".createSelection(): null");
 		return null;
 	}
 
-	
+
 	/**
 	 * Redraw the policyflow with the new selection
 	 * @param newSelected
 	 */
-	private void redrawPolicyFlow(PolicySteps oldSelection, PolicySteps newSelected) {
+	private void redrawPolicyFlow(final PolicySteps oldSelection, final PolicySteps newSelected) {
 		if (newSelected != oldSelection){
 			if (newSelected != null){
-				PaintData paintData = paintdataMap.get(newSelected);
+				final PaintData paintData = paintdataMap.get(newSelected);
 				canvas.redraw(paintData.minX-1, paintData.minY-1, paintData.maxX+1, paintData.maxY+1, false);
 			}
 
 			if (oldSelection != null){
-				PaintData paintData = paintdataMap.get(oldSelection );
+				final PaintData paintData = paintdataMap.get(oldSelection );
 				canvas.redraw(paintData.minX-1, paintData.minY-1, paintData.maxX+1, paintData.maxY+1, false);
 			}
 		}
 	}
 
+	@Override
 	public void dispose(){
 		canvas.dispose();
 		pageContent.dispose();
@@ -544,59 +550,60 @@ public class DetailedPolicyFlowPage extends Page  implements ISelectionChangedLi
 	}
 
 	@Override
-	public void mouseDoubleClick(MouseEvent e) {
+	public void mouseDoubleClick(final MouseEvent e) {
 		mouseDown(e);		
 	}
 
-	private boolean isStatusOverlayPosition(int x, int y){
-		for (PolicySteps policySet : PolicySteps.values()) {
-			Image overlay = policy2ImageMap.get(policySet);
-	    	if (overlay != null){
-	    		Rectangle rect = overlay.getBounds();
-	    		PaintData paintData = paintdataMap.get(policySet);
-	    		rect.x = paintData.minX;
-	    		rect.y = paintData.minY;
-	    		if (rect.contains(x, y)){
-	    			return true;
-	    		}
-	    	}
+	private boolean isStatusOverlayPosition(final int x, final int y){
+		for (final PolicySteps policySet : PolicySteps.values()) {
+			final Image overlay = policy2ImageMap.get(policySet);
+			if (overlay != null){
+				final Rectangle rect = overlay.getBounds();
+				final PaintData paintData = paintdataMap.get(policySet);
+				rect.x = paintData.minX;
+				rect.y = paintData.minY;
+				if (rect.contains(x, y)){
+					return true;
+				}
+			}
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Get the worst case status message for the policy set under the given x-y coordinates
 	 * @param x
 	 * @param y
 	 * @return
 	 */
-	private StatusLogMessage getWorstStatusMessage(int x, int y){
-		for (PolicySteps policySet : PolicySteps.values()) {
-			Image overlay = policy2ImageMap.get(policySet);
-	    	if (overlay != null){
-	    		PaintData paintData = paintdataMap.get(policySet);
-	    		Rectangle rect = overlay.getBounds();
-	    		rect.x = paintData.minX;
-	    		rect.y = paintData.minY;
-	    		if (rect.contains(x, y)){
-	    			Status worstStatus = Status.UNKNOWN;
-	    			StatusLogMessage worstStatusMessage = null;
-	    			
-	    			List<IPolicySetLogMessage> messageList = input.getPolicy2MessageMap().get(policySet);
+	private StatusLogMessage getWorstStatusMessage(final int x, final int y){
+		for (final PolicySteps policySet : PolicySteps.values()) {
+			final Image overlay = policy2ImageMap.get(policySet);
+			if (overlay != null){
+				final PaintData paintData = paintdataMap.get(policySet);
+				final Rectangle rect = overlay.getBounds();
+				rect.x = paintData.minX;
+				rect.y = paintData.minY;
+				if (rect.contains(x, y)){
+					Status worstStatus = Status.UNKNOWN;
+					StatusLogMessage worstStatusMessage = null;
 
-	    			for (IPolicySetLogMessage iPolicySetLogMessage : messageList) {
-	    				List<StatusLogMessage> allStatusses = input.getPolicy2StatusMap().get(iPolicySetLogMessage);
-	    				if (allStatusses != null){
-	    					for (StatusLogMessage statusLogMessage : allStatusses) {
-	    						if (worstStatus.getLevel() < statusLogMessage.getStatus().getLevel())
-	    	    					worstStatusMessage = statusLogMessage;
-	    							worstStatus = statusLogMessage.getStatus();
-	    					}
-	    				}
-	    			}
-	    			return worstStatusMessage;
-	    		}
-	    	}
+					final List<IPolicySetLogMessage> messageList = input.getPolicy2MessageMap().get(policySet);
+
+					for (final IPolicySetLogMessage iPolicySetLogMessage : messageList) {
+						final List<StatusLogMessage> allStatusses = input.getPolicy2StatusMap().get(iPolicySetLogMessage);
+						if (allStatusses != null){
+							for (final StatusLogMessage statusLogMessage : allStatusses) {
+								if (worstStatus.getLevel() < statusLogMessage.getStatus().getLevel()) {
+									worstStatusMessage = statusLogMessage;
+								}
+								worstStatus = statusLogMessage.getStatus();
+							}
+						}
+					}
+					return worstStatusMessage;
+				}
+			}
 		}
 		return null;
 	}
@@ -607,36 +614,36 @@ public class DetailedPolicyFlowPage extends Page  implements ISelectionChangedLi
 	 * @param y
 	 * @return
 	 */
-	private PolicySteps getPolicySets(int x, int y){
-		for (PolicySteps policySet : PolicySteps.values()) {
-    		PaintData paintData = paintdataMap.get(policySet);
+	private PolicySteps getPolicySets(final int x, final int y){
+		for (final PolicySteps policySet : PolicySteps.values()) {
+			final PaintData paintData = paintdataMap.get(policySet);
 			if (paintData.polygon.contains(x,y)){
 				return policySet;
 			}
 		}
 		return null;
 	}
-	
+
 	@Override
-	public void mouseDown(MouseEvent e) {
+	public void mouseDown(final MouseEvent e) {
 		switch (e.button) {
 		case 1:
 			redrawPolicyFlow(rightClickSelectedPolicySet, null);
 			rightClickSelectedPolicySet = null;
-			
+
 			final StatusLogMessage statusMessage = getWorstStatusMessage(e.x,e.y);
 			if (statusMessage != null){
 				System.out.println("mouseDown(): Setting selection to "+statusMessage);
 				details.setSelection(createSelection(statusMessage));
 			}else{
-				PolicySteps aPolicy = getPolicySets(e.x,e.y);
+				final PolicySteps aPolicy = getPolicySets(e.x,e.y);
 				System.out.println("mouseDown(): Setting selection to "+aPolicy);
-				details.setSelection((IStructuredSelection) createSelection(aPolicy));
+				details.setSelection(createSelection(aPolicy));
 			}
 			details.getSite().getPage().activate(details);
 			break;
 		case 3:
-			PolicySteps oldRightClickSelection = rightClickSelectedPolicySet;
+			final PolicySteps oldRightClickSelection = rightClickSelectedPolicySet;
 			rightClickSelectedPolicySet = getPolicySets(e.x,e.y);
 			redrawPolicyFlow(oldRightClickSelection, rightClickSelectedPolicySet);
 			break;
@@ -646,88 +653,91 @@ public class DetailedPolicyFlowPage extends Page  implements ISelectionChangedLi
 	}
 
 	@Override
-	public void mouseUp(MouseEvent e) {
+	public void mouseUp(final MouseEvent e) {
 		//Nothing to do
 	}
 
 	@Override
-	public void menuAboutToShow(IMenuManager manager) {
+	public void menuAboutToShow(final IMenuManager manager) {
 		System.out.println("about to show. selectedPolicySet="+rightClickSelectedPolicySet);
 		if (rightClickSelectedPolicySet != null){
-			List<IPolicySetLogMessage> rootMessages = input.getPolicy2MessageMap().get(rightClickSelectedPolicySet);
-			if (rootMessages != null && rootMessages.size()>0){
+			final List<IPolicySetLogMessage> rootMessages = input.getPolicy2MessageMap().get(rightClickSelectedPolicySet);
+			if ((rootMessages != null) && (rootMessages.size()>0)){
 				if (rootMessages.size()>1){
-					for (IPolicySetLogMessage iPolicySetLogMessage : rootMessages) {
+					for (final IPolicySetLogMessage iPolicySetLogMessage : rootMessages) {
 						String label = null;
 						if (iPolicySetLogMessage.getPolicySet().isSubflowRoot()){
 							//If this is the root, the label should come from itself
 							label = iPolicySetLogMessage.getMessage();							
-						}else
+						} else {
 							//If this is not the root, the parent should have the label
 							label = iPolicySetLogMessage.getParent().getMessage();
+						}
 						//TODO: make this more generic.
 						//Potentially more strings can be removed.
 						label = label.replaceAll("^Subscriber processing ", "");
 						label = label.replaceAll("^Publisher processing ", "");
-						MenuManager subMenu = new MenuManager(Util.elipsisLabelMiddle(label, Util.MAX_LABEL_SIZE), null);				
+						final MenuManager subMenu = new MenuManager(Util.elipsisLabelMiddle(label, Util.MAX_LABEL_SIZE), null);				
 						manager.add(subMenu);
-						
+
 						createPolicysetMenu(iPolicySetLogMessage, subMenu);
-						
+
 					}					
 				}else{
 					//Do not create a submenu if only one policymessage in the list
 					createPolicysetMenu(rootMessages.get(0), menuManager);
 				}
 			}
-			
+
 		}else{
-			if (nonpolicyStatusses != null && nonpolicyStatusses.size()>0)
+			if ((nonpolicyStatusses != null) && (nonpolicyStatusses.size()>0)) {
 				createStatusSubmenu(manager, nonpolicyStatusses);
+			}
 		}
 	}
 
 	private void createPolicysetMenu(final IPolicySetLogMessage iPolicySetLogMessage,
-			MenuManager subMenu) {
+			final MenuManager subMenu) {
 		createPolicysetSubmenu(subMenu, iPolicySetLogMessage);
-		
-		List<StatusLogMessage> statusses = input.getPolicy2StatusMap().get(iPolicySetLogMessage);
-		if (statusses != null && statusses.size()>0){				
+
+		final List<StatusLogMessage> statusses = input.getPolicy2StatusMap().get(iPolicySetLogMessage);
+		if ((statusses != null) && (statusses.size()>0)){				
 			createStatusSubmenu(subMenu, statusses);
 		}
-		List<ILogMessage> traces = input.getPolicy2TraceMap().get(iPolicySetLogMessage);
-		if (traces != null && traces.size()>0)
+		final List<ILogMessage> traces = input.getPolicy2TraceMap().get(iPolicySetLogMessage);
+		if ((traces != null) && (traces.size()>0)) {
 			createTracesSubmenu(subMenu, traces);
-		
+		}
+
 		if (iPolicySetLogMessage.getPolicySet().isSubflowRoot()){
-			
+
 			subMenu.add(new OpenDetailAction(new IStructuredSelection() {
-				
+
 				@Override
 				public boolean isEmpty() {
 					return false;
 				}
-				
+
 				@Override
 				public List<?> toList() {
 					return Arrays.asList(toArray());
 				}
-				
+
 				@Override
 				public Object[] toArray() {
 					return new Object[]{iPolicySetLogMessage};
 				}
-				
+
 				@Override
 				public int size() {
 					return 1;
 				}
-				
+
 				@Override
 				public Iterator<?> iterator() {
 					return toList().iterator();
 				}
-				
+
 				@Override
 				public Object getFirstElement() {
 					return iPolicySetLogMessage;
@@ -736,44 +746,44 @@ public class DetailedPolicyFlowPage extends Page  implements ISelectionChangedLi
 		}
 	}
 
-	private void createTracesSubmenu(IMenuManager manager,
-			List<ILogMessage> traces) {
-		MenuManager subMenu = new MenuManager("Trace", null);				
+	private void createTracesSubmenu(final IMenuManager manager,
+			final List<ILogMessage> traces) {
+		final MenuManager subMenu = new MenuManager("Trace", null);				
 		for (final ILogMessage iLogMessage : traces) {
 			subMenu.add(new GotoLogmessageAction(Util.elipsisLabelEnd(iLogMessage.getMessage(), Util.MAX_LABEL_SIZE), iLogMessage));			
 		}
 		manager.add(subMenu);
 	}
 
-	private void createPolicysetSubmenu(IMenuManager manager, IPolicySetLogMessage iPolicySetLogMessage) {
+	private void createPolicysetSubmenu(final IMenuManager manager, final IPolicySetLogMessage iPolicySetLogMessage) {
 		if (iPolicySetLogMessage.hasChildren()){
-			List<ILogMessage> children = iPolicySetLogMessage.getChildren();
+			final List<ILogMessage> children = iPolicySetLogMessage.getChildren();
 			MenuManager subMenu = null;
 			if (iPolicySetLogMessage.getPolicySet().isSubflowRoot()){
 				//Only list the policySets
 				subMenu = new MenuManager("Policy Set", null);
 				for (final ILogMessage iLogMessage : children) {
 					if (iLogMessage instanceof IPolicySetLogMessage){
-						String message = iLogMessage.getMessage();
+						final String message = iLogMessage.getMessage();
 						/*
 						Matcher matcher = applyingPolicySetPattern.matcher(message);
-				
+
 						if (matcher.find()){
 							message = message.substring(matcher.end());
 						}*/
 						subMenu.add(new GotoLogmessageAction(Util.elipsisLabelEnd(message,Util.MAX_LABEL_SIZE), iLogMessage));						
 					}
 				}
-				
+
 			}else{
 				subMenu = new MenuManager("Policy", null);
 				for (final ILogMessage iLogMessage : children) {
-			
-					if (iLogMessage.getMessage().startsWith("Applying policy:")){
+					String message = iLogMessage.getMessage();
+
+					if (message.startsWith("Applying policy:") || message.startsWith("Applying XSLT policy:")){
 						//We need to create a submenu
-						String message = iLogMessage.getMessage();
-						Matcher matcher = applyingPolicyPattern.matcher(message);
-				
+						final Matcher matcher = applyingPolicyPattern.matcher(message);
+
 						if (matcher.find()){
 							message = message.substring(matcher.start()+4,matcher.end()-3);
 						}
@@ -781,17 +791,18 @@ public class DetailedPolicyFlowPage extends Page  implements ISelectionChangedLi
 					}
 				}
 			}
-			if (!subMenu.isEmpty())
+			if (!subMenu.isEmpty()) {
 				manager.add(subMenu);
+			}
 		}
 	}
 
-	private void createStatusSubmenu(IMenuManager manager, List<StatusLogMessage> statusses) {
-		MenuManager subMenu = new MenuManager("Status", null);				
+	private void createStatusSubmenu(final IMenuManager manager, final List<StatusLogMessage> statusses) {
+		final MenuManager subMenu = new MenuManager("Status", null);				
 		for (final StatusLogMessage statusLogMessage : statusses) {
-			StringBuilder sbLabel = new StringBuilder();
+			final StringBuilder sbLabel = new StringBuilder();
 			sbLabel.append(statusLogMessage.getStatus().geLabel());
-			String message = statusLogMessage.getStatusMessage();
+			final String message = statusLogMessage.getStatusMessage();
 			if (message != null){
 				sbLabel.append(": ");
 				sbLabel.append(message);
@@ -801,11 +812,11 @@ public class DetailedPolicyFlowPage extends Page  implements ISelectionChangedLi
 		manager.add(subMenu);
 	}
 
-	
 
 
-	
-	
+
+
+
 
 
 	/*
@@ -824,11 +835,11 @@ public class DetailedPolicyFlowPage extends Page  implements ISelectionChangedLi
 					buildNonpolicyStatusList(iLogMessage);
 				}
 			}
-			
+
 		}
 	}*/
 
-	private Image getOverlayFor(Status worstStatus) {
+	private Image getOverlayFor(final Status worstStatus) {
 		switch (worstStatus) {
 		case WARNING:
 			return overlayWarning;
@@ -847,26 +858,28 @@ public class DetailedPolicyFlowPage extends Page  implements ISelectionChangedLi
 
 	private void createOverlayMap(){
 		//Overlays are again per policy set, based on the statusses found before
-		Set<StaticTraceEditorInput.PolicySteps> keys = input.getPolicy2MessageMap().keySet();
-		for (StaticTraceEditorInput.PolicySteps policySets : keys) {
-			List<IPolicySetLogMessage> messageList = input.getPolicy2MessageMap().get(policySets);
+		final Set<StaticTraceEditorInput.PolicySteps> keys = input.getPolicy2MessageMap().keySet();
+		for (final StaticTraceEditorInput.PolicySteps policySets : keys) {
+			final List<IPolicySetLogMessage> messageList = input.getPolicy2MessageMap().get(policySets);
 			Status worstStatus = Status.UNKNOWN;
-			for (IPolicySetLogMessage iPolicySetLogMessage : messageList) {
-				List<StatusLogMessage> allStatusses = input.getPolicy2StatusMap().get(iPolicySetLogMessage);
-				if (allStatusses != null)
-					worstStatus = getWorstStatus(worstStatus, allStatusses);				
+			for (final IPolicySetLogMessage iPolicySetLogMessage : messageList) {
+				final List<StatusLogMessage> allStatusses = input.getPolicy2StatusMap().get(iPolicySetLogMessage);
+				if (allStatusses != null) {
+					worstStatus = getWorstStatus(worstStatus, allStatusses);
+				}				
 			}
-	    	Image overlay = getOverlayFor(worstStatus);
-	    	if (overlay != null){
-	    		policy2ImageMap.put(policySets, overlay);
-	    	}
+			final Image overlay = getOverlayFor(worstStatus);
+			if (overlay != null){
+				policy2ImageMap.put(policySets, overlay);
+			}
 		}		
 	}
-	
-	private Status getWorstStatus(Status currentWorstStatus, List<StatusLogMessage> allStatusses) {
-		for (StatusLogMessage statusLogMessage : allStatusses) {
-			if (currentWorstStatus.getLevel() < statusLogMessage.getStatus().getLevel())
+
+	private Status getWorstStatus(Status currentWorstStatus, final List<StatusLogMessage> allStatusses) {
+		for (final StatusLogMessage statusLogMessage : allStatusses) {
+			if (currentWorstStatus.getLevel() < statusLogMessage.getStatus().getLevel()) {
 				currentWorstStatus = statusLogMessage.getStatus();
+			}
 		}
 		return currentWorstStatus;
 	}
@@ -874,12 +887,13 @@ public class DetailedPolicyFlowPage extends Page  implements ISelectionChangedLi
 
 	public void refresh() {
 		createOverlayMap();
-		if (canvas != null)
+		if (canvas != null) {
 			canvas.redraw();
+		}
 	}
 
 	@Override
-	public void notifyRootChanged(ILogMessage newValue, ILogMessage oldValue) {
+	public void notifyRootChanged(final ILogMessage newValue, final ILogMessage oldValue) {
 		createOverlayMap();
 		canvas.redraw();
 	}
@@ -888,34 +902,34 @@ public class DetailedPolicyFlowPage extends Page  implements ISelectionChangedLi
 	 * The selection in the editor changed.
 	 */
 	@Override
-	public void selectionChanged(SelectionChangedEvent event) {
+	public void selectionChanged(final SelectionChangedEvent event) {
 		//Remove any right click selection when we are receiving a new selection
 		rightClickSelectedPolicySet = null;
 		redrawPolicyFlow(rightClickSelectedPolicySet, null);
-		
+
 		//Now get the actual selection (if any)
-		ISelection selection = event.getSelection();
+		final ISelection selection = event.getSelection();
 		if (selection == null){
 			return;
 		}
-		
+
 		System.out.println(this.getClass().getName()+ ".selectionChanged() to "+selection);
 		if (selection instanceof IStructuredSelection){
-			Object selectedObject = ((IStructuredSelection) selection).getFirstElement();
+			final Object selectedObject = ((IStructuredSelection) selection).getFirstElement();
 			System.out.println(this.getClass().getName()+ ".selectionChanged() to "+selectedObject);
 			if (selectedObject == null){
 				redrawPolicyFlow(selectedPolicySet, null);
 				selectedPolicySet=null;
 				return;				
 			}
-			
+
 			if (selectedObject instanceof ILogMessageProvider){
 				ILogMessage message = ((ILogMessageProvider) selectedObject).getLogMessage();
 				while(true){
 					if (message instanceof IPolicySetLogMessage){
-						Set<StaticTraceEditorInput.PolicySteps> keys = input.getPolicy2MessageMap().keySet();
-						for (StaticTraceEditorInput.PolicySteps policySets : keys) {
-							List<IPolicySetLogMessage> listOfPolicies = input.getPolicy2MessageMap().get(policySets);
+						final Set<StaticTraceEditorInput.PolicySteps> keys = input.getPolicy2MessageMap().keySet();
+						for (final StaticTraceEditorInput.PolicySteps policySets : keys) {
+							final List<IPolicySetLogMessage> listOfPolicies = input.getPolicy2MessageMap().get(policySets);
 							if (listOfPolicies.contains(message)){
 								redrawPolicyFlow(selectedPolicySet, policySets);
 								//Update the selection
@@ -934,19 +948,19 @@ public class DetailedPolicyFlowPage extends Page  implements ISelectionChangedLi
 			}
 		}
 	}
-	
+
 	@Override
-	public void addSelectionChangedListener(ISelectionChangedListener listener) {
+	public void addSelectionChangedListener(final ISelectionChangedListener listener) {
 		//We are not a selection provider....
 	}
 
 	@Override
-	public void removeSelectionChangedListener(ISelectionChangedListener listener) {
+	public void removeSelectionChangedListener(final ISelectionChangedListener listener) {
 		//We are not a selection provider....
 	}
 
 	@Override
-	public void setSelection(ISelection selection) {
+	public void setSelection(final ISelection selection) {
 		//We are not a selection provider....
 	}
 
