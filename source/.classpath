@@ -3,6 +3,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="/home/stefaanv/apps/designer402/plugins/com.novell.core_4.0.0.201401071232/novellcore.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.novell.core"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

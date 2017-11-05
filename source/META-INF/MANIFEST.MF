@@ -34,7 +34,8 @@ Import-Package: com.novell.core,
  com.novell.ldap.rfc2251,
  com.novell.ldap.spml,
  com.novell.ldap.util,
- com.novell.nds.dirxml.util
+ com.novell.nds.dirxml.util,
+ org.eclipse.ui;resolution:=optional
 Export-Package: info.vancauwenberge.designer.enhtrace,
  info.vancauwenberge.designer.enhtrace.action,
  info.vancauwenberge.designer.enhtrace.api,
